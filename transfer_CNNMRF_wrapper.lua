@@ -319,17 +319,33 @@ local function main(params)
   end
 
   --------------------------------------------------------------------------------------------------------
+  -- local function to make filename for result
+  --------------------------------------------------------------------------------------------------------
+  local function make_filename(params, t)
+    local params_strings = {
+      string.format('res_%d', cur_res),
+      string.format('t_%d', t),
+      string.format('cw_%04d', params.content_weight)
+    }
+    for li = 1, #params.mrf_layers do
+      table.insert(params_strings, string.format('l%dw_%.4f', params.mrf_layers[li], params.mrf_weight[li]))
+    end
+    return table.concat(params_strings, '.')
+  end
+
+  --------------------------------------------------------------------------------------------------------
   -- local function for saving inter-mediate result
   --------------------------------------------------------------------------------------------------------
   local function maybe_save(t)
     local should_save = params.save_iter > 0 and t % params.save_iter == 0
     should_save = should_save or t == params.num_iter
     if should_save then
-    local disp = deprocess(input_image:float())
-    disp = image.minmax{tensor=disp, min=0, max=1}
-    disp = image.scale(disp, render_width, render_height, 'bilinear')
-    local filename = string.format('%s/res_%d_%d.jpg', params.output_folder, cur_res, t)
-    image.save(filename, disp)
+      local disp = deprocess(input_image:float())
+      disp = image.minmax{tensor=disp, min=0, max=1}
+      disp = image.scale(disp, render_width, render_height, 'bilinear')
+      local params_string = make_filename(params, t)
+      local filename = params.output_folder .. '/' .. params_string .. '.jpg'
+      image.save(filename, disp)
     end
   end
 
