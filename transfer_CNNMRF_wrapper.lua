@@ -3,6 +3,7 @@ require 'nn'
 require 'image'
 require 'paths'
 require 'loadcaffe'
+display = require 'display'
 
 paths.dofile('mylib/myoptimizer.lua')
 paths.dofile('mylib/tv.lua')
@@ -346,6 +347,7 @@ local function main(params)
       local params_string = make_filename(params, t)
       local filename = params.output_folder .. '/' .. params_string .. '.jpg'
       image.save(filename, disp)
+      display.image(disp, {title=params_string, min=0, max=1, width=params.max_size})
     end
   end
 
