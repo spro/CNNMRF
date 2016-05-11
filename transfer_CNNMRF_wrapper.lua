@@ -13,7 +13,7 @@ paths.dofile('mylib/content.lua')
 
 torch.setdefaulttensortype('torch.FloatTensor') -- float as default tensor type
 
-local function main(params)
+local function main(params, onProgress)
   os.execute('mkdir data/result/')
   os.execute('mkdir data/result/trans/')
   os.execute('mkdir data/result/trans/MRF/')
@@ -348,6 +348,10 @@ local function main(params)
       local filename = params.output_folder .. '/' .. params_string .. '.jpg'
       image.save(filename, disp)
       display.image(disp, {title=params_string, min=0, max=1, width=params.max_size})
+      url_filename = string.format('/results/%s_TO_%s/%s.jpg', params.content_name, params.style_name, params_string)
+      if onProgress ~= nil then
+        onProgress({resolution=cur_res, progress=t/params.num_iter[cur_res], preview=url_filename})
+      end
     end
   end
 
@@ -556,7 +560,7 @@ local function main(params)
 end -- end of main
 
 
-local function run_test(content_name, style_name, ini_method, max_size, num_res, num_iter, mrf_layers, mrf_weight, mrf_patch_size, mrf_num_rotation, mrf_num_scale, mrf_sample_stride, mrf_synthesis_stride, mrf_confidence_threshold, content_layers, content_weight, tv_weight, mode, gpu_chunck_size_1, gpu_chunck_size_2, backend)
+local function run_test(content_name, style_name, ini_method, max_size, num_res, num_iter, mrf_layers, mrf_weight, mrf_patch_size, mrf_num_rotation, mrf_num_scale, mrf_sample_stride, mrf_synthesis_stride, mrf_confidence_threshold, content_layers, content_weight, tv_weight, mode, gpu_chunck_size_1, gpu_chunck_size_2, backend, onProgress)
   -- local clock = os.clock
   -- function sleep(n)  -- seconds
   --   local t0 = clock()
@@ -606,10 +610,11 @@ local function run_test(content_name, style_name, ini_method, max_size, num_res,
 
   params.output_folder = string.format('data/result/trans/MRF/%s_TO_%s',params.content_name,  params.style_name)
 
-  main(params)
+  main(params, onProgress)
 
   local t_test = timer_TEST:time().real
   print(string.format('Total time: %f seconds', t_test))
+
   -- sleep(1)
   return flag_state
 end
